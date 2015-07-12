@@ -4,43 +4,24 @@ import (
 	"net/http"
 	"secure"
 
-	crand "crypto/rand"
 	"flag"
 	"fmt"
 	"io"
 	"log"
 	"net"
 	"os"
-
-	"golang.org/x/crypto/nacl/box"
 )
 
 // Dial generates a private/public key pair,
 // connects to the server, perform the handshake
 // and return a reader/writer.
 func Dial(addr string) (io.ReadWriteCloser, error) {
-	pub, priv, gErr := box.GenerateKey(crand.Reader)
-	if gErr != nil {
-		return nil, gErr
-	}
 
 	conn, dErr := net.Dial("tcp", addr)
 	if dErr != nil {
 		return nil, dErr
 	}
 
-	buf := make([]byte, 1024)
-	// send pub & priv keys
-	for i, b := range pub {
-		buf[i] = b
-	}
-
-	_, err := conn.Write(buf)
-	if err != nil {
-		return nil, err
-	}
-	// n, err = conn.Write(*priv)
-	// return secured connection
 	return secure.NewSecureConnetion(conn, priv, pub), nil
 }
 

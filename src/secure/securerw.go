@@ -10,9 +10,9 @@ import (
 )
 
 type SecureWriter struct {
-	w         io.Writer
-	priv, pub *[32]byte
-	nonce     *[24]byte
+	w     io.Writer
+	key   *[32]byte
+	nonce *[24]byte
 }
 
 func (sw *SecureWriter) Write(message []byte) (int, error) {
@@ -23,13 +23,16 @@ func (sw *SecureWriter) Write(message []byte) (int, error) {
 
 // NewSecureWriter instantiates a new SecureWriter
 func NewSecureWriter(w io.Writer, priv, pub *[32]byte) io.Writer {
-	return &SecureWriter{w: w, priv: priv, pub: pub, nonce: getNonce()}
+	var key [32]byte
+	box.Precompute(&key, pub, priv)
+	return &SecureWriter{w: w, key: &key}
+	// return &SecureWriter{w: w, priv: priv, pub: pub, nonce: GetNonce()}
 }
 
 type SecureReader struct {
-	r         io.Reader
-	priv, pub *[32]byte
-	nonce     *[24]byte
+	r     io.Reader
+	key   *[32]byte
+	nonce *[24]byte
 }
 
 func (sr *SecureReader) Read(output []byte) (int, error) {
@@ -53,5 +56,8 @@ func (sr *SecureReader) Read(output []byte) (int, error) {
 
 // NewSecureReader instantiates a new SecureReader
 func NewSecureReader(r io.Reader, priv, pub *[32]byte) io.Reader {
-	return &SecureReader{r: r, priv: priv, pub: pub, nonce: getNonce()}
+	var key [32]byte
+	box.Precompute(&key, pub, priv)
+	return &SecureReader{r: r, key: &key}
+	// return &SecureReader{r: r, priv: priv, pub: pub, nonce: GetNonce()}
 }

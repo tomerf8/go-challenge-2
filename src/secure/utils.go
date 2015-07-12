@@ -9,7 +9,7 @@ var (
 	globalNonce [24]byte
 )
 
-func getNonce() *[24]byte {
+func GetNonce() *[24]byte {
 	for i, _ := range globalNonce {
 		globalNonce[i] = byte(int(rand.Int31()))
 	}
